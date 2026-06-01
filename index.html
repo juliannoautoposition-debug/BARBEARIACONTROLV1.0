@@ -296,10 +296,10 @@
         <div class="panel anim-fadeup">
           <h3 class="panel-gold" id="formTitle" style="margin-bottom:14px"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Cadastrar Cliente</h3>
           <input type="hidden" id="editIdx">
-          <label>Nome completo</label><input id="cNome" placeholder="Ex: João Silva" class="input-anim">
-          <label>Telefone / WhatsApp</label><input id="cTel" placeholder="Ex: (88) 99999-9999" class="input-anim">
-          <label>E-mail</label><input id="cEmail" placeholder="Ex: cliente@email.com" class="input-anim">
-          <label>Endereço</label><input id="cEnd" placeholder="Ex: Rua A, 123" class="input-anim">
+          <label>Nome completo</label><input id="cNome" autocomplete="off" placeholder="Ex: João Silva" class="input-anim">
+          <label>Telefone / WhatsApp</label><input id="cTel" autocomplete="off" placeholder="Ex: (88) 99999-9999" class="input-anim">
+          <label>E-mail</label><input id="cEmail" autocomplete="off" placeholder="Ex: cliente@email.com" class="input-anim">
+          <label>Endereço</label><input id="cEnd" autocomplete="off" placeholder="Ex: Rua A, 123" class="input-anim">
           <button class="btn btn-gold btn-full btn-lift" onclick="salvarCliente()" id="btnSalvar">Salvar Cliente</button>
           <button class="btn btn-dark btn-full btn-lift" id="btnCancelar" onclick="limparCliente()" style="display:none;margin-top:8px">Cancelar edição</button>
         </div>
@@ -308,7 +308,7 @@
             <h3 class="panel-gold"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clientes Cadastrados</h3>
             <span class="pill" id="countClientes">0 clientes</span>
           </div>
-          <input id="buscaCliente" placeholder="🔍 Pesquisar por nome ou telefone..." oninput="renderClientes()" class="input-anim" style="margin-bottom:12px">
+          <input id="buscaCliente" autocomplete="off" placeholder="🔍 Pesquisar por nome ou telefone..." oninput="renderClientes()" class="input-anim" style="margin-bottom:12px">
           <div class="tbl-wrap">
             <table><thead><tr><th>Cliente</th><th class="tc">Telefone</th><th class="tc">Ações</th></tr></thead>
             <tbody id="listaClientes"></tbody></table>
@@ -325,12 +325,12 @@
           <h3 class="panel-gold" style="margin-bottom:14px"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg> Registrar Corte</h3>
           <label>Cliente</label>
           <div class="cs-wrap" id="csWrap">
-            <input id="buscaClienteAtend" placeholder="🔍 Pesquisar cliente..." oninput="renderDrop()" onfocus="abrirDrop()" class="input-anim">
+            <input id="buscaClienteAtend" autocomplete="off" placeholder="🔍 Pesquisar cliente..." oninput="renderDrop()" onfocus="abrirDrop()" class="input-anim">
             <input type="hidden" id="clienteSel">
             <div class="cs-drop" id="csDrop"></div>
           </div>
-          <label>Tipo de corte</label><input id="aTipo" placeholder="Ex: Degradê, barba, social..." class="input-anim">
-          <label>Valor (R$)</label><input id="aValor" type="number" placeholder="Ex: 35" class="input-anim">
+          <label>Tipo de corte</label><input id="aTipo" autocomplete="off" placeholder="Ex: Degradê, barba, social..." class="input-anim">
+          <label>Valor (R$)</label><input id="aValor" autocomplete="off" type="number" placeholder="Ex: 35" class="input-anim">
           <label>Observação</label><textarea id="aObs" placeholder="Detalhes..." class="input-anim"></textarea>
           <button class="btn btn-gold btn-full btn-lift" onclick="salvarAtend()"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg> Registrar Atendimento</button>
         </div>
@@ -714,6 +714,13 @@
   function fecharModal(id){$(id).classList.remove('show');delCb=null;}
   document.addEventListener('click',e=>{if(e.target.classList.contains('modal'))fecharModal(e.target.id);if(!e.target.closest('#csWrap'))$('csDrop').classList.remove('open');});
 
+  limparCliente();
+  if($('buscaCliente')) $('buscaCliente').value='';
+  if($('buscaClienteAtend')) $('buscaClienteAtend').value='';
+  if($('clienteSel')) $('clienteSel').value='';
+  if($('aTipo')) $('aTipo').value='';
+  if($('aValor')) $('aValor').value='';
+  if($('aObs')) $('aObs').value='';
   renderAll();
   iniciarFirebase();
   </script>
