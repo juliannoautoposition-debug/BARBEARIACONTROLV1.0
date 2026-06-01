@@ -402,16 +402,49 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
   const SENHA='Sucesso@2026';
-  let clientes=JSON.parse(localStorage.getItem('lord_clientes')||'[]');
-  let atend=JSON.parse(localStorage.getItem('lord_atend')||'[]');
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbUtusz-gIIJUBzhm0V_nvxPJYXz7V9og",
+    authDomain: "lordbarbeariav1.firebaseapp.com",
+    projectId: "lordbarbeariav1",
+    storageBucket: "lordbarbeariav1.firebasestorage.app",
+    messagingSenderId: "567317147157",
+    appId: "1:567317147157:web:a6c550bd0203f18825681c"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let clientes=[];
+  let atend=[];
   let delCb=null,curFilter='hoje';
   const $=id=>document.getElementById(id);
   const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
   const ini=n=>(n||'?')[0].toUpperCase();
   const today=()=>new Date().toLocaleDateString('pt-BR');
-  const saveAll=()=>{localStorage.setItem('lord_clientes',JSON.stringify(clientes));localStorage.setItem('lord_atend',JSON.stringify(atend))};
+  const saveAll=()=>{};
+
+  function iniciarFirebase(){
+    db.collection('clientes').orderBy('createdAtMs','asc').onSnapshot(snapshot=>{
+      clientes=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+      renderAll();
+    },error=>{
+      console.error('Erro ao carregar clientes:',error);
+      alert('Erro ao conectar clientes ao Firebase. Verifique as regras do Firestore.');
+    });
+
+    db.collection('atendimentos').orderBy('createdAtMs','asc').onSnapshot(snapshot=>{
+      atend=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+      renderAll();
+    },error=>{
+      console.error('Erro ao carregar atendimentos:',error);
+      alert('Erro ao conectar atendimentos ao Firebase. Verifique as regras do Firestore.');
+    });
+  }
 
   // ── COUNT-UP ──
   function countUp(el,target,isMoney=false,duration=850){
@@ -580,11 +613,30 @@
   }
 
   // ── CLIENTES ──
-  function salvarCliente(){
+  async function salvarCliente(){
     const nome=$('cNome').value.trim();if(!nome){alert('Informe o nome.');return;}
-    const c={nome,telefone:$('cTel').value.trim(),email:$('cEmail').value.trim(),endereco:$('cEnd').value.trim()};
-    const idx=$('editIdx').value;idx!==''?clientes[+idx]=c:clientes.push(c);
-    limparCliente();saveAll();renderAll();
+    const c={
+      nome,
+      telefone:$('cTel').value.trim(),
+      email:$('cEmail').value.trim(),
+      endereco:$('cEnd').value.trim(),
+      updatedAt:new Date().toISOString()
+    };
+
+    const idx=$('editIdx').value;
+    try{
+      if(idx!=='' && clientes[+idx] && clientes[+idx].id){
+        await db.collection('clientes').doc(clientes[+idx].id).update(c);
+      }else{
+        c.createdAt=new Date().toISOString();
+        c.createdAtMs=Date.now();
+        await db.collection('clientes').add(c);
+      }
+      limparCliente();
+    }catch(error){
+      console.error('Erro ao salvar cliente:',error);
+      alert('Erro ao salvar cliente no Firebase.');
+    }
   }
   function limparCliente(){
     $('cNome').value=$('cTel').value=$('cEmail').value=$('cEnd').value=$('editIdx').value='';
@@ -603,7 +655,14 @@
     $('infoCliente').innerHTML=[['Nome',c.nome],['Telefone',c.telefone],['E-mail',c.email],['Endereço',c.endereco],['Total atendimentos',r.length],['Total gasto',money(t)]].map(([k,v])=>`<div class="info-row"><small>${k}</small><strong>${v||'Não informado'}</strong></div>`).join('');
     $('modalVer').classList.add('show');
   }
-  function pedirDelCliente(i){const c=clientes[i];if(!c)return;abrirDel('Cliente: '+c.nome,()=>{clientes.splice(i,1);saveAll();renderAll();});}
+  function pedirDelCliente(i){const c=clientes[i];if(!c)return;abrirDel('Cliente: '+c.nome,async ()=>{
+    try{
+      if(c.id){await db.collection('clientes').doc(c.id).delete();}
+    }catch(error){
+      console.error('Erro ao excluir cliente:',error);
+      alert('Erro ao excluir cliente no Firebase.');
+    }
+  });}
 
   // ── ATENDIMENTOS ──
   function abrirDrop(){$('csDrop').classList.add('open');renderDrop();}
@@ -616,15 +675,38 @@
       <div class="av av-sm">${ini(c.nome)}</div><div><strong>${c.nome}</strong><small>${c.telefone||''}</small></div></div>`).join('');
   }
   function selecionarCliente(n){$('clienteSel').value=n;$('buscaClienteAtend').value=n;$('csDrop').classList.remove('open');}
-  function salvarAtend(){
+  async function salvarAtend(){
     if(!$('clienteSel').value){alert('Selecione um cliente.');return;}
     if(!$('aTipo').value.trim()){alert('Informe o tipo de corte.');return;}
     const d=new Date();
-    atend.push({cliente:$('clienteSel').value,tipo:$('aTipo').value.trim(),valor:parseFloat($('aValor').value)||0,obs:$('aObs').value.trim(),data:d.toLocaleDateString('pt-BR'),hora:d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});
-    $('clienteSel').value=$('buscaClienteAtend').value=$('aTipo').value=$('aValor').value=$('aObs').value='';
-    $('csDrop').classList.remove('open');saveAll();renderAll();
+    const novoAtendimento={
+      cliente:$('clienteSel').value,
+      tipo:$('aTipo').value.trim(),
+      valor:parseFloat($('aValor').value)||0,
+      obs:$('aObs').value.trim(),
+      data:d.toLocaleDateString('pt-BR'),
+      hora:d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+      createdAt:d.toISOString(),
+      createdAtMs:Date.now()
+    };
+
+    try{
+      await db.collection('atendimentos').add(novoAtendimento);
+      $('clienteSel').value=$('buscaClienteAtend').value=$('aTipo').value=$('aValor').value=$('aObs').value='';
+      $('csDrop').classList.remove('open');
+    }catch(error){
+      console.error('Erro ao salvar atendimento:',error);
+      alert('Erro ao salvar atendimento no Firebase.');
+    }
   }
-  function pedirDelAtend(i){const a=atend[i];if(!a)return;abrirDel('Atendimento: '+a.tipo+' — '+a.cliente,()=>{atend.splice(i,1);saveAll();renderAll();});}
+  function pedirDelAtend(i){const a=atend[i];if(!a)return;abrirDel('Atendimento: '+a.tipo+' — '+a.cliente,async ()=>{
+    try{
+      if(a.id){await db.collection('atendimentos').doc(a.id).delete();}
+    }catch(error){
+      console.error('Erro ao excluir atendimento:',error);
+      alert('Erro ao excluir atendimento no Firebase.');
+    }
+  });}
 
   // ── DEL MODAL ──
   function abrirDel(txt,cb){delCb=cb;$('delTexto').textContent=txt;$('delSenha').value='';$('delErro').textContent='';$('modalDel').classList.add('show');setTimeout(()=>$('delSenha').focus(),120);}
@@ -633,6 +715,7 @@
   document.addEventListener('click',e=>{if(e.target.classList.contains('modal'))fecharModal(e.target.id);if(!e.target.closest('#csWrap'))$('csDrop').classList.remove('open');});
 
   renderAll();
+  iniciarFirebase();
   </script>
   </body>
   </html>
