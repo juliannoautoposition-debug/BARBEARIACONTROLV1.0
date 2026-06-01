@@ -25,6 +25,7 @@
   @keyframes rowSlide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
   @keyframes logoPulse{0%,100%{box-shadow:0 0 24px rgba(212,175,55,.25)}50%{box-shadow:0 0 44px rgba(212,175,55,.6),0 0 70px rgba(212,175,55,.12)}}
   @keyframes glowRing{0%,100%{opacity:.32}50%{opacity:1}}
+  @keyframes ringRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   @keyframes shimmer{0%{background-position:-220% center}100%{background-position:220% center}}
   @keyframes borderGlow{0%,100%{border-color:rgba(212,175,55,.28)}50%{border-color:rgba(212,175,55,.75)}}
   @keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
@@ -183,8 +184,8 @@
   /* Logo ring wrapper */
   .logo-ring-wrap{position:relative;display:inline-block;margin-bottom:12px}
   .ring1,.ring2{position:absolute;border-radius:50%;pointer-events:none}
-  .ring1{inset:-4px;border:1.5px solid var(--gold-b)}
-  .ring2{inset:-9px;border:1px solid rgba(212,175,55,.15);animation-delay:1.6s}
+  .ring1{inset:-4px;border:1.5px solid var(--gold-b);animation:glowRing 3.2s ease-in-out infinite, ringRotate 12s linear infinite}
+  .ring2{inset:-9px;border:1px solid rgba(212,175,55,.15);animation:glowRing 3.2s ease-in-out infinite 1.6s, ringRotate 18s linear infinite reverse}
 
   @media(max-width:900px){body{display:block}aside{position:relative;width:100%;border-right:0;border-bottom:1px solid var(--line)}.wrap{margin-left:0;width:100%}.stats,.stats3{grid-template-columns:1fr 1fr}.two,.form-grid{grid-template-columns:1fr}}
   </style>
