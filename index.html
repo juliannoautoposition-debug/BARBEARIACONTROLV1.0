@@ -2190,6 +2190,56 @@
     }
   }
 
+
+  /* Campo de senha com olhinho */
+  .pass-wrap{
+    position:relative;
+    width:100%;
+  }
+  .pass-wrap input{
+    padding-right:44px!important;
+  }
+  .pass-eye{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px;
+    height:30px;
+    border:0;
+    margin:0!important;
+    padding:0!important;
+    border-radius:8px;
+    background:transparent!important;
+    color:var(--mut)!important;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:none!important;
+  }
+  .pass-eye:hover{
+    color:var(--gold)!important;
+    transform:translateY(-50%)!important;
+    filter:none!important;
+  }
+  .gest-service-pass-box{
+    margin-top:10px;
+    padding:10px 11px;
+    border:1px solid rgba(212,175,55,.18);
+    border-radius:12px;
+    background:#0d0d0f;
+  }
+  .gest-service-pass-box label{
+    margin-top:0;
+  }
+
+
+  /* Botão seguro no histórico para excluir pelo agendamento */
+  .btn-hist-ag{
+    white-space:nowrap;
+  }
+
 </style>
   </head>
   <body>
@@ -2219,7 +2269,10 @@
       <input id="login20Usuario" class="input-anim" type="text" placeholder="Digite o usuário" autocomplete="off" onkeydown="if(event.key==='Enter')$('login20Senha')?.focus()">
 
       <label>Senha de acesso</label>
-      <input id="login20Senha" class="input-anim" type="password" placeholder="Digite a senha" autocomplete="off" onkeydown="if(event.key==='Enter')login20Entrar()">
+      <div class="pass-wrap">
+        <input id="login20Senha" class="input-anim" type="password" placeholder="Digite a senha" autocomplete="off" onkeydown="if(event.key==='Enter')login20Entrar()">
+        <button class="pass-eye" type="button" onclick="toggleSenhaCampo('login20Senha',this)" aria-label="Mostrar senha"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
       <button class="btn btn-gold btn-lift" type="button" onclick="login20Entrar()">Entrar no sistema</button>
       <div id="login20Erro" class="login20-err"></div>
     </div>
@@ -2278,7 +2331,6 @@
     <div class="hdr">
       <div>
         <h1>Painel Administrativo</h1>
-        <div class="sub"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg> Lord Barbearia</div>
       </div>
       <div class="date-card">
         <div class="d"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> <span id="dateStr"></span></div>
@@ -2435,7 +2487,7 @@
       <div class="hdr">
         <div>
           <h1>Agendamentos</h1>
-          <div class="sub">📅 Solicitações recebidas pelo link público</div>
+          <div class="sub">Controle de agendamentos</div>
         </div>
       </div>
 
@@ -2558,10 +2610,9 @@
 
             <div class="gest-barber-actions">
               <button class="btn btn-gold btn-lift" type="button" onclick="gestAbrirServicosModal()">Adicionar tipo de serviço</button>
-              <button class="btn btn-dark btn-lift gest-history-btn" type="button" onclick="gestAbrirHistoricoBarbeiros()">Histórico de cortes por barbeiro</button>
             </div>
 
-            <div class="gest-barber-status">Os serviços serão gerenciados em uma janela separada.</div>
+            <div class="gest-barber-status"></div>
           </div>
 
           <div class="gest-barber-card gest-sync-height" id="gestCardListaBarbeiros">
@@ -2592,7 +2643,7 @@
           <div class="gest-service-head">
             <div>
               <h3>Tipos de serviços</h3>
-              <small>Cadastre os serviços, valores e veja tudo ao lado.</small>
+              <small>Cadastro de serviços e valores.</small>
             </div>
             <button class="btn btn-dark btn-sm btn-lift" type="button" onclick="gestFecharServicosModal()">Fechar</button>
           </div>
@@ -2600,7 +2651,7 @@
           <div class="gest-service-window">
             <div class="gest-service-panel">
               <h4>Adicionar serviço</h4>
-              <p>Informe o nome e o valor que aparecerão no agendamento do cliente.</p>
+              <p>Informe o serviço, valor e senha de segurança.</p>
 
               <label>Nome do serviço</label>
               <input id="gestServicoNome" class="input-anim" autocomplete="off" placeholder="Ex: Corte degradê">
@@ -2608,6 +2659,14 @@
               <label>Valor do serviço</label>
               <input id="gestServicoValor" class="input-anim" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 35,00">
               <input id="gestServicoEditId" type="hidden">
+
+              <div class="gest-service-pass-box">
+                <label>Senha de segurança</label>
+                <div class="pass-wrap">
+                  <input id="gestServicoSenha" class="input-anim" type="password" placeholder="Digite a senha padrão" autocomplete="off" onkeydown="if(event.key==='Enter')gestAdicionarServico()">
+                  <button class="pass-eye" type="button" onclick="toggleSenhaCampo('gestServicoSenha',this)" aria-label="Mostrar senha"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+              </div>
 
               <button id="gestServicoBtnSalvar" class="btn btn-gold btn-lift btn-full" type="button" onclick="gestAdicionarServico()">Adicionar serviço</button>
               <button id="gestServicoBtnCancelar" class="btn btn-dark btn-lift btn-full" type="button" onclick="gestCancelarEdicaoServico()" style="display:none">Cancelar edição</button>
@@ -2618,7 +2677,7 @@
               <div class="gest-service-title-row">
                 <div>
                   <h4>Serviços e valores</h4>
-                  <p>Lista exibida para o cliente no agendamento.</p>
+                  <p>Serviços disponíveis.</p>
                 </div>
                 <span id="gestServicosCount" class="gest-service-count">0</span>
               </div>
@@ -2874,7 +2933,10 @@
       <p class="del-warn">Digite a senha de segurança para confirmar esta exclusão.</p>
       <div class="del-target" id="delTexto"></div>
       <label>Senha de segurança</label>
-      <input id="delSenha" type="password" placeholder="Digite a senha" class="input-anim" onkeydown="if(event.key==='Enter')confirmarDel()">
+      <div class="pass-wrap">
+        <input id="delSenha" type="password" placeholder="Digite a senha" class="input-anim" onkeydown="if(event.key==='Enter')confirmarDel()">
+        <button class="pass-eye" type="button" onclick="toggleSenhaCampo('delSenha',this)" aria-label="Mostrar senha"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
       <div class="del-err" id="delErro"></div>
       <div class="del-acts">
         <button class="btn btn-dark btn-lift" onclick="fecharModal('modalDel')">Cancelar</button>
@@ -2958,6 +3020,15 @@
 
     if(!ok)setTimeout(()=>{$('login20Usuario')?.focus();},120);
   }
+
+  function toggleSenhaCampo(id,btn){
+    const input=$(id);
+    if(!input)return;
+    const mostrar=input.type==='password';
+    input.type=mostrar?'text':'password';
+    if(btn)btn.setAttribute('aria-label',mostrar?'Ocultar senha':'Mostrar senha');
+  }
+
   function login20Entrar(){
     const usuario=($('login20Usuario')?.value||'').trim();
     const senha=$('login20Senha')?.value||'';
@@ -2996,28 +3067,80 @@
   let clientes=[];
   let atend=[];
   let agendamentos=[];
+  let clientesCarregados=false;
+  let atendCarregados=false;
+  let agClientesSyncing=false;
+  const agAtendSyncing=new Set();
+  let agAtendExcluidos=JSON.parse(localStorage.getItem('lordAgAtendExcluidos')||'{}');
   let agAcaoConfirmada=null;
   let curAgFilter='hoje';
   let delCb=null,curFilter='hoje';
   const $=id=>document.getElementById(id);
   const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
   function normalizarNome20(nome){return String(nome||'').trim().replace(/\s+/g,' ').toLowerCase();}
+  function agIdAtendimento(item){
+    const direto=item?.agendamentoId||item?.agendamentoOrigemId||'';
+    if(direto)return String(direto);
+    const id=String(item?.id||'');
+    return id.startsWith('atendimento_agendamento_')?id.replace('atendimento_agendamento_',''):'';
+  }
+  function atendimentoAgendamentoFoiExcluido(agId){
+    return !!(agId&&agAtendExcluidos&&agAtendExcluidos[String(agId)]);
+  }
+  async function marcarAtendimentoAgendamentoExcluido(agId){
+    if(!agId)return;
+    agAtendExcluidos[String(agId)]={excluido:true,excluidoEm:new Date().toISOString()};
+    localStorage.setItem('lordAgAtendExcluidos',JSON.stringify(agAtendExcluidos));
+    try{
+      if(typeof db!=='undefined'&&db){
+        await db.collection('configuracoes').doc('agendamento').set({agAtendExcluidos:agAtendExcluidos},{merge:true});
+      }
+    }catch(error){
+      console.warn('Trava de exclusão salva localmente.',error);
+    }
+  }
   const ini=n=>(n||'?')[0].toUpperCase();
   const today=()=>new Date().toLocaleDateString('pt-BR');
   const saveAll=()=>{};
 
+
+  function limparDuplicadosAtendimentosAgendados(lista){
+    const vistos=new Set();
+    const saida=[];
+
+    for(const item of lista){
+      const agId=item?.agendamentoId||item?.agendamentoOrigemId||'';
+      const origem=String(item?.origem||'').toLowerCase();
+
+      if(agId&&(origem==='agendamento'||String(item?.id||'').startsWith('atendimento_agendamento_'))){
+        if(atendimentoAgendamentoFoiExcluido(agId))continue;
+        if(vistos.has(agId))continue;
+        vistos.add(agId);
+      }
+
+      saida.push(item);
+    }
+
+    return saida;
+  }
+
   function iniciarFirebase(){
     db.collection('clientes').orderBy('createdAtMs','asc').onSnapshot(snapshot=>{
       clientes=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+      clientesCarregados=true;
       renderAll();
+      sincronizarClientesDosAgendamentos();
     },error=>{
       console.error('Erro ao carregar clientes:',error);
       alert('Erro ao conectar clientes ao Firebase. Verifique as regras do Firestore.');
     });
 
     db.collection('atendimentos').orderBy('createdAtMs','asc').onSnapshot(snapshot=>{
-      atend=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+      const atendSnapshot=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+      atend=limparDuplicadosAtendimentosAgendados(atendSnapshot);
+      atendCarregados=true;
       renderAll();
+      sincronizarAtendimentosFinalizadosAgendamentos();
     },error=>{
       console.error('Erro ao carregar atendimentos:',error);
       alert('Erro ao conectar atendimentos ao Firebase. Verifique as regras do Firestore.');
@@ -3026,6 +3149,8 @@
     db.collection('agendamentos').orderBy('createdAtMs','desc').onSnapshot(snapshot=>{
       agendamentos=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
       renderAll();
+      sincronizarClientesDosAgendamentos();
+      sincronizarAtendimentosFinalizadosAgendamentos();
     },error=>{
       console.error('Erro ao carregar agendamentos:',error);
       alert('Erro ao conectar agendamentos ao Firebase. Verifique as regras do Firestore.');
@@ -3111,6 +3236,7 @@
         const data=doc.data()||{};
         gestBarbeiros=Array.isArray(data.barbeiros)?data.barbeiros:[];
         gestServicos=Array.isArray(data.servicos)?data.servicos:[];
+        localStorage.setItem('lordServicos',JSON.stringify(gestServicos));
         gestPercentuaisBarbeiros=data.percentuaisBarbeiros&&typeof data.percentuaisBarbeiros==='object'
           ?data.percentuaisBarbeiros
           :JSON.parse(localStorage.getItem('lordPercentuaisBarbeiros')||'{}');
@@ -3120,14 +3246,19 @@
         finPagamentosCiclos=data.finPagamentosCiclos&&typeof data.finPagamentosCiclos==='object'
           ?data.finPagamentosCiclos
           :JSON.parse(localStorage.getItem('lordFinPagamentosCiclos')||'{}');
+        agAtendExcluidos=data.agAtendExcluidos&&typeof data.agAtendExcluidos==='object'
+          ?data.agAtendExcluidos
+          :JSON.parse(localStorage.getItem('lordAgAtendExcluidos')||'{}');
+        localStorage.setItem('lordAgAtendExcluidos',JSON.stringify(agAtendExcluidos));
         gestHorariosDataBarbeiro=data.horariosDataBarbeiro&&typeof data.horariosDataBarbeiro==='object'?data.horariosDataBarbeiro:{};
         gestDiasFechadosBarbeiro=data.diasFechadosBarbeiro&&typeof data.diasFechadosBarbeiro==='object'?data.diasFechadosBarbeiro:{};
       }else{
         gestBarbeiros=[];
-        gestServicos=[];
+        gestServicos=JSON.parse(localStorage.getItem('lordServicos')||'[]');
         gestPercentuaisBarbeiros=JSON.parse(localStorage.getItem('lordPercentuaisBarbeiros')||'{}');
         finConfigCiclo=JSON.parse(localStorage.getItem('lordFinConfigCiclo')||'{"tipo":"semanal","dias":7}');
         finPagamentosCiclos=JSON.parse(localStorage.getItem('lordFinPagamentosCiclos')||'{}');
+        agAtendExcluidos=JSON.parse(localStorage.getItem('lordAgAtendExcluidos')||'{}');
         gestHorariosDataBarbeiro={};
         gestDiasFechadosBarbeiro={};
       }
@@ -3161,6 +3292,7 @@
         percentuaisBarbeiros:gestPercentuaisBarbeiros,
         finConfigCiclo:finConfigCiclo,
         finPagamentosCiclos:finPagamentosCiclos,
+        agAtendExcluidos:agAtendExcluidos,
         horariosDataBarbeiro:gestHorariosDataBarbeiro,
         diasFechadosBarbeiro:gestDiasFechadosBarbeiro,
         updatedAt:new Date().toISOString()
@@ -3175,6 +3307,33 @@
       gestStatusBarbeiro('Erro ao salvar barbeiros.','err');
     }
   }
+
+  function gestNormalizarTextoServico(txt){
+    return String(txt||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  }
+
+  async function gestSalvarServicos(silencioso=false){
+    try{
+      if(!silencioso)gestStatusServico('Salvando serviços...');
+      localStorage.setItem('lordServicos',JSON.stringify(gestServicos));
+
+      if(typeof db!=='undefined'&&db){
+        await db.collection('configuracoes').doc('agendamento').set({
+          servicos:[...gestServicos],
+          updatedAt:new Date().toISOString()
+        },{merge:true});
+      }
+
+      gestRenderServicos();
+      if(!silencioso)gestStatusServico('Serviços salvos com sucesso.','ok');
+      return true;
+    }catch(e){
+      console.error('Erro ao salvar serviços:',e);
+      gestStatusServico('Erro ao salvar no Firebase. Tente novamente.','err');
+      return false;
+    }
+  }
+
   async function gestAdicionarBarbeiro(){
     const nome=$('gestBarbeiroNome')?.value.trim();
     if(!nome){
@@ -3292,6 +3451,13 @@
     const valorRaw=String($('gestServicoValor')?.value||'').replace(',','.');
     const valor=Number(valorRaw);
     const editId=$('gestServicoEditId')?.value||'';
+    const senhaServico=$('gestServicoSenha')?.value||'';
+
+    if(senhaServico!==SENHA){
+      gestStatusServico('Senha de segurança incorreta.','err');
+      $('gestServicoSenha')?.focus();
+      return;
+    }
 
     if(!nome){
       gestStatusServico('Informe o nome do serviço.','err');
@@ -3328,8 +3494,7 @@
     }
 
     gestLimparFormularioServico();
-    gestRenderServicos();
-    await gestSalvarBarbeiros(true);
+    await gestSalvarServicos(false);
   }
   function gestEditarServico(id){
     const item=gestServicos.find(s=>s.id===id);
@@ -3352,6 +3517,8 @@
     if($('gestServicoNome'))$('gestServicoNome').value='';
     if($('gestServicoValor'))$('gestServicoValor').value='';
     if($('gestServicoEditId'))$('gestServicoEditId').value='';
+    if($('gestServicoSenha'))$('gestServicoSenha').value='';
+    if($('gestServicoSenha'))$('gestServicoSenha').type='password';
 
     const btn=$('gestServicoBtnSalvar');
     const cancel=$('gestServicoBtnCancelar');
@@ -3364,11 +3531,40 @@
   }
 
   async function gestRemoverServico(id){
-    if(!confirm('Remover este serviço da lista?'))return;
-    gestServicos=gestServicos.filter(s=>s.id!==id);
+    const item=gestServicos.find(s=>String(s.id)===String(id));
+    if(!item){
+      gestStatusServico('Serviço não encontrado. Atualizando lista...','err');
+      gestRenderServicos();
+      return;
+    }
+
+    if(!confirm('Remover este serviço definitivamente?'))return;
+
+    const senha=prompt('Digite a senha padrão para excluir este serviço:');
+    if(senha!==SENHA){
+      gestStatusServico('Senha incorreta. Serviço não removido.','err');
+      return;
+    }
+
+    const nomeNormalizado=gestNormalizarTextoServico(item.nome);
+    const antes=gestServicos.length;
+
+    // Remove pelo ID e também possíveis duplicados com o mesmo nome, para não "voltar" na lista.
+    gestServicos=gestServicos.filter(s=>
+      String(s.id)!==String(id) && gestNormalizarTextoServico(s.nome)!==nomeNormalizado
+    );
+
+    if(gestServicos.length===antes){
+      gestStatusServico('Nenhum serviço foi removido.','err');
+      return;
+    }
+
     gestRenderServicos();
-    await gestSalvarBarbeiros(true);
-    gestStatusServico('Serviço removido com sucesso.','ok');
+    const ok=await gestSalvarServicos(true);
+
+    if(ok){
+      gestStatusServico('Serviço removido definitivamente.','ok');
+    }
   }
   function gestRenderServicos(){
     const box=$('gestServicosLista');
@@ -3387,7 +3583,7 @@
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
           <button class="btn btn-dark btn-sm btn-lift" type="button" onclick="gestEditarServico('${s.id}')">Editar</button>
-          <button class="btn btn-red btn-sm btn-lift" type="button" onclick="gestRemoverServico('${s.id}')">Remover</button>
+          <button class="btn btn-red btn-sm btn-lift" type="button" onclick="gestRemoverServico('${s.id}')">Excluir</button>
         </div>
       </div>
     `).join(''):'<div class="empty-msg">Nenhum serviço cadastrado ainda.</div>';
@@ -3980,7 +4176,7 @@
           </div>
         </td>
         <td>${a.telefone||'-'}</td>
-        <td>${a.servico||'-'}</td>
+        <td>${a.servico||'-'}${a.barbeiroNome?`<div class="td-m">${a.barbeiroNome}</div>`:''}</td>
         <td>${dataBRAg(a.data)}</td>
         <td>${a.hora||'-'}</td>
         <td><span class="status ${statusClassAg(a.status)}">${a.status||'Pendente'}</span></td>
@@ -4015,7 +4211,8 @@
     $('agDetalhes').innerHTML=`
       <div class="info-card"><small>Cliente</small><strong>${a.nome||'Não informado'}</strong></div>
       <div class="info-card"><small>WhatsApp</small><strong>${a.telefone||'Não informado'}</strong></div>
-      <div class="info-card"><small>Serviço</small><strong>${a.servico||'Não informado'}</strong></div>
+      <div class="info-card"><small>Serviço</small><strong>${a.servico||'Não informado'}${valorAgendamento(a)?' — '+money(valorAgendamento(a)):''}</strong></div>
+      <div class="info-card"><small>Barbeiro</small><strong>${a.barbeiroNome||'Não informado'}</strong></div>
       <div class="info-card"><small>Data e horário</small><strong>${dataBRAg(a.data)} às ${a.hora||'--:--'}</strong></div>
       <div class="info-card"><small>Status</small><strong>${a.status||'Pendente'}</strong></div>
       <div class="info-card"><small>Origem</small><strong>${a.origem||'cliente'}</strong></div>
@@ -4037,6 +4234,172 @@
   }
   function fecharAgConfirm(){$('modalAgConfirm').classList.remove('show');agAcaoConfirmada=null;}
   function executarAgConfirm(){if(typeof agAcaoConfirmada==='function')agAcaoConfirmada();fecharAgConfirm();}
+  function normalizarTelefoneAg(valor){
+    return String(valor||'').replace(/\D/g,'');
+  }
+
+  function clienteExisteParaAgendamento(a){
+    const nome=normalizarNome20(a?.nome||'');
+    const tel=normalizarTelefoneAg(a?.telefone||'');
+    return clientes.some(c=>{
+      const cNome=normalizarNome20(c.nome||'');
+      const cTel=normalizarTelefoneAg(c.telefone||'');
+      return (tel&&cTel&&tel===cTel)||(nome&&cNome&&nome===cNome);
+    });
+  }
+
+  async function garantirClienteDoAgendamento(a){
+    if(!a||!String(a.nome||'').trim())return null;
+    if(clienteExisteParaAgendamento(a))return null;
+
+    const payload={
+      nome:String(a.nome||'').trim().replace(/\s+/g,' '),
+      telefone:String(a.telefone||'').trim(),
+      email:'',
+      endereco:'',
+      origem:'agendamento',
+      nomeNormalizado:normalizarNome20(a.nome||''),
+      telefoneDigits:normalizarTelefoneAg(a.telefone||''),
+      createdAt:new Date().toISOString(),
+      createdAtMs:Date.now(),
+      updatedAt:new Date().toISOString()
+    };
+
+    const doc=await db.collection('clientes').add(payload);
+    clientes.push({id:doc.id,...payload});
+    return doc.id;
+  }
+
+  async function sincronizarClientesDosAgendamentos(){
+    if(agClientesSyncing||!clientesCarregados||!agendamentos.length)return;
+    agClientesSyncing=true;
+    try{
+      for(const ag of agendamentos){
+        if(!ag?.nome)continue;
+        if(!clienteExisteParaAgendamento(ag)){
+          await garantirClienteDoAgendamento(ag);
+        }
+      }
+      renderClientes();
+    }catch(error){
+      console.warn('Não foi possível cadastrar cliente automático do agendamento:',error);
+    }finally{
+      agClientesSyncing=false;
+    }
+  }
+
+  function valorAgendamento(a){
+    return Number(a?.servicoValor||a?.valorServico||a?.valor||0)||0;
+  }
+
+  function dataAtendimentoAgendamento(a){
+    if(a?.data&&String(a.data).includes('-'))return dataBRAg(a.data);
+    return a?.data||today();
+  }
+
+  function createdAtMsAgendamento(a){
+    if(a?.data){
+      const hora=a?.hora||'00:00';
+      const dt=new Date(String(a.data)+'T'+hora+':00');
+      if(!Number.isNaN(dt.getTime()))return dt.getTime();
+    }
+    return Date.now();
+  }
+
+  function atendimentoExisteParaAgendamento(agId){
+    if(!agId)return false;
+    return atend.some(x=>
+      x.agendamentoId===agId||
+      x.agendamentoOrigemId===agId||
+      x.id==='atendimento_agendamento_'+agId
+    );
+  }
+
+  async function registrarAtendimentoDoAgendamento(a){
+    if(!a||!a.id)return null;
+
+    const agId=String(a.id);
+    const docId='atendimento_agendamento_'+agId;
+
+    if(atendimentoAgendamentoFoiExcluido(agId))return null;
+    if(agAtendSyncing.has(agId)||atendimentoExisteParaAgendamento(agId)||a.atendimentoGerado===true)return null;
+    agAtendSyncing.add(agId);
+
+    try{
+      const ref=db.collection('atendimentos').doc(docId);
+      const existente=await ref.get();
+
+      if(existente.exists){
+        const dados={id:existente.id,...existente.data()};
+        if(!atendimentoExisteParaAgendamento(agId))atend.push(dados);
+        try{
+          await db.collection('agendamentos').doc(agId).update({
+            atendimentoGerado:true,
+            atendimentoId:docId,
+            atendimentoGeradoEm:dados.createdAt||new Date().toISOString()
+          });
+        }catch(_){ }
+        return docId;
+      }
+
+      const criadoMs=createdAtMsAgendamento(a);
+      const payload={
+        cliente:a.nome||'Não informado',
+        barbeiroId:a.barbeiroId||'',
+        barbeiroNome:a.barbeiroNome||'Não informado',
+        tipo:a.servico||'Serviço agendado',
+        valor:valorAgendamento(a),
+        obs:(a.obs?String(a.obs)+'\n':'')+'Gerado automaticamente a partir do agendamento.',
+        data:dataAtendimentoAgendamento(a),
+        hora:a.hora||new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+        origem:'agendamento',
+        agendamentoId:agId,
+        agendamentoOrigemId:agId,
+        createdAt:new Date(criadoMs).toISOString(),
+        createdAtMs:criadoMs
+      };
+
+      await ref.set(payload,{merge:false});
+      atend.push({id:docId,...payload});
+
+      try{
+        await db.collection('agendamentos').doc(agId).update({
+          atendimentoGerado:true,
+          atendimentoId:docId,
+          atendimentoGeradoEm:new Date().toISOString()
+        });
+      }catch(_){ }
+
+      renderAtend();
+      renderFinPage();
+      renderDash();
+      return docId;
+    }finally{
+      agAtendSyncing.delete(agId);
+    }
+  }
+
+  let agAtendSyncLoop=false;
+  async function sincronizarAtendimentosFinalizadosAgendamentos(){
+    if(agAtendSyncLoop||!atendCarregados||!agendamentos.length)return;
+    agAtendSyncLoop=true;
+    try{
+      for(const ag of agendamentos){
+        if((ag.status||'')!=='Finalizado')continue;
+        if(atendimentoAgendamentoFoiExcluido(ag.id))continue;
+        if(ag.atendimentoGerado===true||atendimentoExisteParaAgendamento(ag.id))continue;
+        try{
+          await garantirClienteDoAgendamento(ag);
+          await registrarAtendimentoDoAgendamento(ag);
+        }catch(error){
+          console.warn('Não foi possível gerar atendimento automático do agendamento:',error);
+        }
+      }
+    }finally{
+      agAtendSyncLoop=false;
+    }
+  }
+
   async function atualizarStatusAg(id,status){
     const payload={status,updatedAt:new Date().toISOString()};
     if(status==='Finalizado')payload.finalizadoAt=new Date().toISOString();
@@ -4050,8 +4413,12 @@
   }
   function finalizarAgendamento(id){
     const a=getAg(id); if(!a){alert('Agendamento não encontrado.');return;}
-    abrirAgConfirm('Finalizar atendimento','Deseja marcar este agendamento como finalizado?',a,'Finalizar','btn-gold',async()=>{
-      try{await atualizarStatusAg(id,'Finalizado');}catch(e){console.error(e);alert('Erro ao finalizar agendamento.');}
+    abrirAgConfirm('Finalizar atendimento','Deseja marcar este agendamento como finalizado? O cliente será cadastrado automaticamente e o serviço entrará no histórico de cortes e no financeiro.',a,'Finalizar','btn-gold',async()=>{
+      try{
+        await garantirClienteDoAgendamento(a);
+        await registrarAtendimentoDoAgendamento(a);
+        await atualizarStatusAg(id,'Finalizado');
+      }catch(e){console.error(e);alert('Erro ao finalizar agendamento.');}
     });
   }
   function cancelarAgendamento(id){
@@ -4060,14 +4427,127 @@
       try{await atualizarStatusAg(id,'Cancelado');}catch(e){console.error(e);alert('Erro ao cancelar agendamento.');}
     });
   }
-  function excluirAgendamento(id){
-    const a=getAg(id); if(!a){alert('Agendamento não encontrado.');return;}
-    abrirDel('Agendamento: '+(a.nome||'Agendamento'),async()=>{
-      try{await db.collection('agendamentos').doc(id).delete();}catch(e){console.error(e);alert('Erro ao excluir agendamento.');}
+  async function excluirAtendimentoGeradoDoAgendamento(id){
+    if(!id)return;
+    await marcarAtendimentoAgendamentoExcluido(id);
+    const docId='atendimento_agendamento_'+id;
+
+    try{
+      await db.collection('atendimentos').doc(docId).delete();
+    }catch(error){
+      console.warn('Atendimento vinculado pelo ID padrão não encontrado ou já removido.',error);
+    }
+
+    const relacionados=atend.filter(a=>
+      a?.agendamentoId===id||
+      a?.agendamentoOrigemId===id||
+      a?.id===docId
+    );
+
+    for(const item of relacionados){
+      try{
+        if(item.id&&item.id!==docId){
+          await db.collection('atendimentos').doc(item.id).delete();
+        }
+      }catch(error){
+        console.warn('Não foi possível remover atendimento vinculado ao agendamento:',error);
+      }
+    }
+
+    atend=atend.filter(a=>
+      a?.agendamentoId!==id&&
+      a?.agendamentoOrigemId!==id&&
+      a?.id!==docId
+    );
+  }
+
+  async function excluirAtendimentoOrfaoDoHistorico(a,agId){
+    if(!a)return;
+    if(agId)await marcarAtendimentoAgendamentoExcluido(agId);
+    const ids=new Set();
+    if(a.id)ids.add(a.id);
+    if(agId)ids.add('atendimento_agendamento_'+agId);
+
+    const relacionados=atend.filter(item=>
+      item===a||
+      (agId&&(
+        item?.agendamentoId===agId||
+        item?.agendamentoOrigemId===agId||
+        item?.id==='atendimento_agendamento_'+agId
+      ))
+    );
+
+    relacionados.forEach(item=>{if(item?.id)ids.add(item.id);});
+
+    for(const id of ids){
+      try{await db.collection('atendimentos').doc(id).delete();}
+      catch(error){console.warn('Atendimento já removido ou não encontrado:',id,error);}
+    }
+
+    atend=atend.filter(item=>
+      item!==a&&
+      (!agId||(
+        item?.agendamentoId!==agId&&
+        item?.agendamentoOrigemId!==agId&&
+        item?.id!=='atendimento_agendamento_'+agId
+      ))&&
+      !(a.id&&item?.id===a.id)
+    );
+
+    renderAtend();
+    renderFinPage();
+    renderDash();
+  }
+
+  function excluirAgendamentoPeloHistorico(i){
+    const a=atend[i];
+    if(!a){alert('Atendimento não encontrado.');return;}
+
+    const agId=a.agendamentoId||a.agendamentoOrigemId||String(a.id||'').replace('atendimento_agendamento_','');
+    const agendamento=agId?getAg(agId):null;
+
+    if(agendamento){
+      // Se o agendamento ainda existe, exclui pelo próprio agendamento, com senha,
+      // sem localizar, sem filtrar e sem esconder a lista de agendamentos.
+      excluirAgendamento(agId);
+      return;
+    }
+
+    // Se o agendamento não existe mais, limpa apenas o lançamento órfão do histórico/financeiro.
+    abrirDel('Este agendamento não existe mais. Remover o atendimento do histórico e do financeiro? '+(a.cliente||''),async()=>{
+      try{
+        await excluirAtendimentoOrfaoDoHistorico(a,agId);
+      }catch(error){
+        console.error('Erro ao remover atendimento órfão:',error);
+        alert('Erro ao remover este atendimento do histórico.');
+      }
     });
   }
 
+  function excluirAgendamento(id){
+    const a=getAg(id); if(!a){alert('Agendamento não encontrado.');return;}
+    const texto=(a.status||'')==='Finalizado'
+      ?'Agendamento finalizado: '+(a.nome||'Agendamento')+' — também será removido do histórico de cortes e do financeiro.'
+      :'Agendamento: '+(a.nome||'Agendamento');
+    abrirDel(texto,async()=>{
+      try{
+        await excluirAtendimentoGeradoDoAgendamento(id);
+        await db.collection('agendamentos').doc(id).delete();
+        agendamentos=agendamentos.filter(ag=>ag.id!==id);
+        renderAgendamentos();
+        renderAtend();
+        renderFinPage();
+        renderDash();
+      }catch(e){console.error(e);alert('Erro ao excluir agendamento.');}
+    });
+  }
+
+  function removerAtendimentosMarcadosComoExcluidosDaTela(){
+    atend=atend.filter(item=>!atendimentoAgendamentoFoiExcluido(agIdAtendimento(item)));
+  }
+
   function renderAll(){
+    removerAtendimentosMarcadosComoExcluidosDaTela();
     renderAgendamentos();renderDash();renderClientes();renderAtend();renderFinPage();}
 
   function renderDash(){
@@ -4186,6 +4666,10 @@
     return true;
   }
 
+  function atendimentoVemDeAgendamento(a){
+    return (a?.origem||'')==='agendamento'||!!a?.agendamentoId||!!a?.agendamentoOrigemId||String(a?.id||'').startsWith('atendimento_agendamento_');
+  }
+
   function renderAtend(){
     atualizarSelectsBarbeirosAtend();
 
@@ -4208,9 +4692,11 @@
         <td class="tc td-g" style="padding:11px 12px;border-bottom:1px solid var(--line)">${money(a.valor)}</td>
         <td class="tc td-m" style="padding:11px 12px;border-bottom:1px solid var(--line)">${a.data}${a.hora?' '+a.hora:''}</td>
         <td class="tc" style="padding:11px 12px;border-bottom:1px solid var(--line)">
-          <button class="btn btn-red btn-sm btn-lift" onclick="pedirDelAtend(${i})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Excluir
-          </button>
+          ${atendimentoVemDeAgendamento(a)
+            ?`<button class="btn btn-dark btn-sm btn-lift btn-hist-ag" onclick="excluirAgendamentoPeloHistorico(${i})">Excluir no agendamento</button>`
+            :`<button class="btn btn-red btn-sm btn-lift" onclick="pedirDelAtend(${i})">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Excluir
+            </button>`}
         </td>
       </tr>`).join('')
       :'<tr><td colspan="6" class="empty-td">Nenhum atendimento encontrado.</td></tr>';
@@ -4406,7 +4892,7 @@
   function carregarPercentualBarbeiro(){
     const id=$('finConfigBarbeiro')?.value||'';
     const barbeiro=gestBarbeiros.find(b=>b.id===id);
-    const valor=Number(gestPercentuaisBarbeiros[id]||0);
+    const valor=barbeiro?percentualFinanceiroBarbeiro(id,barbeiro.nome):0;
 
     if($('finConfigPercentual'))$('finConfigPercentual').value=barbeiro?valor:'';
     if($('finConfigResumo')){
@@ -4439,7 +4925,9 @@
         status.className='fin-config-status err';
         return;
       }
+      const barbeiroSelecionado=gestBarbeiros.find(b=>String(b.id)===String(id));
       gestPercentuaisBarbeiros[id]=valor;
+      if(barbeiroSelecionado?.nome)gestPercentuaisBarbeiros[barbeiroSelecionado.nome]=valor;
       localStorage.setItem('lordPercentuaisBarbeiros',JSON.stringify(gestPercentuaisBarbeiros));
     }
 
@@ -4513,6 +5001,54 @@
   }
 
 
+  function nomeBarbeiroAtendimento(a){
+    return String(a?.barbeiroNome||a?.barbeiro||a?.profissional||a?.barberName||'').trim();
+  }
+
+  function resolverBarbeiroAtendimento(a){
+    const id=String(a?.barbeiroId||a?.barbeiroID||a?.barberId||'').trim();
+    if(id){
+      const porId=gestBarbeiros.find(b=>String(b.id)===id);
+      if(porId)return {id:porId.id,nome:porId.nome};
+    }
+
+    const nome=nomeBarbeiroAtendimento(a);
+    if(nome){
+      const alvo=normalizarNome20(nome);
+      const porNome=gestBarbeiros.find(b=>normalizarNome20(b.nome)===alvo);
+      if(porNome)return {id:porNome.id,nome:porNome.nome};
+      return {id:nome,nome};
+    }
+
+    return {id:'sem_barbeiro',nome:'Não informado'};
+  }
+
+  function percentualFinanceiroBarbeiro(barbeiroId,barbeiroNome){
+    const id=String(barbeiroId||'').trim();
+    const nome=String(barbeiroNome||'').trim();
+
+    if(id&&gestPercentuaisBarbeiros[id]!==undefined)return Number(gestPercentuaisBarbeiros[id]||0);
+    if(nome&&gestPercentuaisBarbeiros[nome]!==undefined)return Number(gestPercentuaisBarbeiros[nome]||0);
+
+    if(nome){
+      const alvo=normalizarNome20(nome);
+      const cadastrado=gestBarbeiros.find(b=>normalizarNome20(b.nome)===alvo);
+      if(cadastrado&&gestPercentuaisBarbeiros[cadastrado.id]!==undefined){
+        return Number(gestPercentuaisBarbeiros[cadastrado.id]||0);
+      }
+
+      const chaveNome=Object.keys(gestPercentuaisBarbeiros).find(k=>normalizarNome20(k)===alvo);
+      if(chaveNome)return Number(gestPercentuaisBarbeiros[chaveNome]||0);
+    }
+
+    return 0;
+  }
+
+  function mesmoBarbeiroFinanceiro(a,barbeiroId){
+    const resolvido=resolverBarbeiroAtendimento(a);
+    return String(resolvido.id)===String(barbeiroId);
+  }
+
   function abrirAtendimentosBarbeiro(barbeiroId){
     const modal=$('modalAtendimentosBarbeiro');
     if(!modal)return;
@@ -4520,16 +5056,16 @@
     const campoRef=$('finDataReferencia');
     const ref=campoRef?.value?new Date(campoRef.value+'T12:00:00'):new Date();
     const {inicio,fim}=intervaloCicloFinanceiro(ref);
-    const barbeiro=gestBarbeiros.find(b=>b.id===barbeiroId);
-    const nome=barbeiro?.nome||'Barbeiro';
+    const barbeiro=gestBarbeiros.find(b=>String(b.id)===String(barbeiroId));
+    const nome=barbeiro?.nome||String(barbeiroId||'Barbeiro');
 
     const registros=atend.filter(a=>{
       const d=dataAtendimentoFinanceiro(a);
-      return d&&d>=inicio&&d<=fim&&a.barbeiroId===barbeiroId;
+      return d&&d>=inicio&&d<=fim&&mesmoBarbeiroFinanceiro(a,barbeiroId);
     });
 
     const total=registros.reduce((s,a)=>s+Number(a.valor||0),0);
-    const percentual=Number(gestPercentuaisBarbeiros[barbeiroId]||0);
+    const percentual=percentualFinanceiroBarbeiro(barbeiroId,nome);
     const repasse=total*(percentual/100);
 
     if($('finAtendTitulo'))$('finAtendTitulo').textContent='Atendimentos de '+nome;
@@ -4575,7 +5111,8 @@
 
     const atendCiclo=atend.filter(a=>{
       const d=dataAtendimentoFinanceiro(a);
-      const barbeiroOk=!filtroBarbeiro||a.barbeiroId===filtroBarbeiro;
+      const resolvido=resolverBarbeiroAtendimento(a);
+      const barbeiroOk=!filtroBarbeiro||String(resolvido.id)===String(filtroBarbeiro);
       return d&&d>=inicio&&d<=fim&&barbeiroOk;
     });
 
@@ -4586,15 +5123,16 @@
 
     const grupos={};
     atendCiclo.forEach(a=>{
-      const id=a.barbeiroId||'sem_barbeiro';
-      const nome=a.barbeiroNome||'Não informado';
+      const resolvido=resolverBarbeiroAtendimento(a);
+      const id=resolvido.id||'sem_barbeiro';
+      const nome=resolvido.nome||'Não informado';
       if(!grupos[id])grupos[id]={id,nome,cortes:0,total:0};
       grupos[id].cortes++;
       grupos[id].total+=Number(a.valor||0);
     });
 
     const resumo=Object.values(grupos).map(g=>{
-      const percentual=g.id==='sem_barbeiro'?0:Number(gestPercentuaisBarbeiros[g.id]||0);
+      const percentual=g.id==='sem_barbeiro'?0:percentualFinanceiroBarbeiro(g.id,g.nome);
       const valorBarbeiro=g.total*(percentual/100);
       const valorBarbearia=g.total-valorBarbeiro;
       return {...g,percentual,valorBarbeiro,valorBarbearia};
@@ -4748,14 +5286,20 @@
       alert('Erro ao salvar atendimento no Firebase.');
     }
   }
-  function pedirDelAtend(i){const a=atend[i];if(!a)return;abrirDel('Atendimento: '+a.tipo+' — '+a.cliente,async ()=>{
-    try{
-      if(a.id){await db.collection('atendimentos').doc(a.id).delete();}
-    }catch(error){
-      console.error('Erro ao excluir atendimento:',error);
-      alert('Erro ao excluir atendimento no Firebase.');
+  function pedirDelAtend(i){const a=atend[i];if(!a)return;
+    if(atendimentoVemDeAgendamento(a)){
+      alert('Esse atendimento veio de um agendamento finalizado. Para remover do histórico e do financeiro, exclua o agendamento na aba Agendamentos.');
+      return;
     }
-  });}
+    abrirDel('Atendimento: '+a.tipo+' — '+a.cliente,async ()=>{
+      try{
+        if(a.id){await db.collection('atendimentos').doc(a.id).delete();}
+      }catch(error){
+        console.error('Erro ao excluir atendimento:',error);
+        alert('Erro ao excluir atendimento no Firebase.');
+      }
+    });
+  }
 
   // ── DEL MODAL ──
   function abrirDel(txt,cb){delCb=cb;$('delTexto').textContent=txt;$('delSenha').value='';$('delErro').textContent='';$('modalDel').classList.add('show');setTimeout(()=>$('delSenha').focus(),120);}
