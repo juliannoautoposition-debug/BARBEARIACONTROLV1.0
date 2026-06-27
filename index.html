@@ -5452,3 +5452,21 @@
   </script>
   </body>
   </html>
+<script>
+const SENHA_FINANCEIRO_TEMP = "lord@2026";
+
+const abrirPaginaOriginal = window.openPage;
+
+window.openPage = function(id){
+  if(id === "financeiro"){
+    const senha = prompt("Digite a senha do financeiro:");
+
+    if(senha !== SENHA_FINANCEIRO_TEMP){
+      alert("Senha incorreta.");
+      return;
+    }
+  }
+
+  abrirPaginaOriginal(id);
+};
+</script>
