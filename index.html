@@ -2240,6 +2240,89 @@
     white-space:nowrap;
   }
 
+
+
+  /* Proteção da aba Financeiro */
+  .finance-lock-modal{
+    position:fixed;
+    inset:0;
+    z-index:12000;
+    background:rgba(0,0,0,.82);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+  }
+  .finance-lock-modal.show{display:flex;animation:fadeInUp .16s ease both}
+  .finance-lock-box{
+    width:100%;
+    max-width:420px;
+    background:linear-gradient(145deg,#18181b,#111114);
+    border:1px solid var(--gold-b);
+    border-radius:20px;
+    padding:22px;
+    box-shadow:0 25px 80px rgba(0,0,0,.72),0 0 42px rgba(212,175,55,.08);
+    animation:scaleIn .25s cubic-bezier(.16,1,.3,1) both;
+  }
+  .finance-lock-icon{
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gold);
+    background:var(--gold-dim);
+    border:1px solid var(--gold-b);
+    box-shadow:0 0 24px rgba(212,175,55,.12);
+  }
+  .finance-lock-box h3{
+    color:var(--gold);
+    text-align:center;
+    font-size:20px;
+    margin-bottom:5px;
+  }
+  .finance-lock-box p{
+    color:var(--mut);
+    text-align:center;
+    font-size:13px;
+    line-height:1.45;
+    margin-bottom:14px;
+  }
+  .finance-pass-wrap{position:relative}
+  .finance-pass-wrap input{padding-right:46px!important}
+  .finance-eye-btn{
+    position:absolute;
+    top:50%;
+    right:6px;
+    transform:translateY(-50%);
+    width:36px;
+    height:34px;
+    border:0;
+    background:transparent;
+    color:var(--mut);
+    cursor:pointer;
+    border-radius:9px;
+  }
+  .finance-eye-btn:hover{background:#202025;color:var(--gold)}
+  .finance-lock-error{
+    min-height:18px;
+    color:#ff7f72;
+    font-size:12.5px;
+    text-align:center;
+    margin-top:8px;
+  }
+  .finance-lock-actions{
+    display:flex;
+    gap:9px;
+    margin-top:13px;
+  }
+  .finance-lock-actions .btn{flex:1;justify-content:center}
+  @media(max-width:520px){.finance-lock-box{padding:18px}.finance-lock-actions{display:grid;grid-template-columns:1fr}}
+
 </style>
   </head>
   <body>
@@ -3939,7 +4022,52 @@
     if(id==='gestaoAgendamentos')setTimeout(()=>gestAbrirTela(),50);
   }
 
+  
+  let pendingFinanceBtn=null;
+  function isFinanceUnlocked(){
+    return sessionStorage.getItem('lordFinanceUnlock')==='1';
+  }
+  function openFinanceLock(btn){
+    pendingFinanceBtn=btn||document.querySelector("nav button[onclick*=\"goPage('financeiro'\"]");
+    const modal=document.getElementById('financeLockModal');
+    const pass=document.getElementById('financeLockPass');
+    const err=document.getElementById('financeLockError');
+    if(err)err.textContent='';
+    if(pass){pass.value='';pass.type='password'}
+    if(modal)modal.classList.add('show');
+    setTimeout(()=>pass&&pass.focus(),80);
+  }
+  function closeFinanceLock(){
+    const modal=document.getElementById('financeLockModal');
+    if(modal)modal.classList.remove('show');
+    pendingFinanceBtn=null;
+  }
+  function financeLockOutside(e){
+    if(e.target===e.currentTarget)closeFinanceLock();
+  }
+  function toggleFinancePass(){
+    const pass=document.getElementById('financeLockPass');
+    if(pass)pass.type=pass.type==='password'?'text':'password';
+  }
+  function financeUnlock(){
+    const pass=document.getElementById('financeLockPass');
+    const err=document.getElementById('financeLockError');
+    if(!pass)return;
+    if(pass.value==='lord@2026'){
+      sessionStorage.setItem('lordFinanceUnlock','1');
+      const btn=pendingFinanceBtn||document.querySelector("nav button[onclick*=\"goPage('financeiro'\"]");
+      closeFinanceLock();
+      goPage('financeiro',btn);
+      return;
+    }
+    if(err)err.textContent='Senha incorreta.';
+  }
+
   function goPage(id,btn){
+    if(id==='financeiro'&&!isFinanceUnlocked()){
+      openFinanceLock(btn);
+      return;
+    }
     document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active')});
     const pg=$(id); pg.classList.add('active');
     pg.style.animation='none'; pg.offsetHeight; pg.style.animation='pageIn .38s cubic-bezier(.16,1,.3,1) both';
@@ -5319,5 +5447,26 @@
   renderAll();
   iniciarFirebase();
   </script>
-  </body>
+  
+  <div class="finance-lock-modal" id="financeLockModal" onclick="financeLockOutside(event)">
+    <div class="finance-lock-box">
+      <div class="finance-lock-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3>Financeiro protegido</h3>
+      <p>Digite a senha para acessar os valores e relatórios financeiros.</p>
+      <label>Senha do financeiro</label>
+      <div class="finance-pass-wrap">
+        <input id="financeLockPass" type="password" placeholder="Digite a senha" onkeydown="if(event.key==='Enter')financeUnlock()">
+        <button class="finance-eye-btn" type="button" onclick="toggleFinancePass()">👁</button>
+      </div>
+      <div class="finance-lock-error" id="financeLockError"></div>
+      <div class="finance-lock-actions">
+        <button class="btn btn-dark" onclick="closeFinanceLock()">Cancelar</button>
+        <button class="btn btn-gold" onclick="financeUnlock()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+</body>
   </html>
