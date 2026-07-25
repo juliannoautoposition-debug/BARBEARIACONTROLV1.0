@@ -5473,5 +5473,102 @@
   renderAll();
   iniciarFirebase();
   </script>
+    <script>
+/* === Filtro de Período Livre - Financeiro (auto-integrável) === */
+(function(){
+  window.finPeriodoLivre=null;
+
+  function injectCSS(){
+    if(document.getElementById('finFreeRangeCSS'))return;
+    const s=document.createElement('style');
+    s.id='finFreeRangeCSS';
+    s.textContent=`
+    .fin-free-range{background:#111115;border:1px solid var(--gold-b);border-radius:13px;padding:13px 14px;margin-bottom:14px;background-image:radial-gradient(ellipse at top left,rgba(212,175,55,.06),transparent 70%)}
+    .fin-free-range-head{display:flex;flex-direction:column;gap:3px;margin-bottom:11px}
+    .fin-free-range-head strong{color:var(--gold);font-size:13.5px}
+    .fin-free-range-head small{color:var(--mut);font-size:11.8px;line-height:1.4}
+    .fin-free-range-fields{display:grid;grid-template-columns:1fr 1fr auto auto;gap:9px;align-items:end}
+    .fin-free-range-fields label{margin:0 0 4px;display:block;color:var(--mut);font-size:11.5px}
+    .fin-free-range-fields input{height:38px;padding:7px 10px;margin:0}
+    .fin-free-range-fields .btn{height:38px}
+    @media(max-width:700px){
+      .fin-free-range-fields{grid-template-columns:1fr 1fr}
+      .fin-free-range-fields .btn{grid-column:span 1}
+      .fin-free-range-fields .btn:last-child{grid-column:1/-1}
+    }`;
+    document.head.appendChild(s);
+  }
+
+  function injectHTML(){
+    if(document.getElementById('finFreeRangeBox'))return;
+    const head=document.querySelector('#financeiro .fin-page-head');
+    if(!head)return;
+    const box=document.createElement('div');
+    box.className='fin-free-range';
+    box.id='finFreeRangeBox';
+    box.innerHTML=`
+      <div class="fin-free-range-head">
+        <strong>Período livre</strong>
+        <small>Escolha datas específicas (ex.: dia 01 ao dia 15) para ver a porcentagem do barbeiro nesse intervalo.</small>
+      </div>
+      <div class="fin-free-range-fields">
+        <div><label>De</label><input type="date" id="finFreeInicio" class="input-anim"></div>
+        <div><label>Até</label><input type="date" id="finFreeFim" class="input-anim"></div>
+        <button class="btn btn-gold btn-sm" type="button" onclick="aplicarPeriodoLivreFin()">Aplicar período</button>
+        <button class="btn btn-dark btn-sm" type="button" onclick="limparPeriodoLivreFin()">Limpar</button>
+      </div>`;
+    head.insertAdjacentElement('afterend',box);
+  }
+
+  window.aplicarPeriodoLivreFin=function(){
+    const ini=document.getElementById('finFreeInicio')?.value;
+    const fim=document.getElementById('finFreeFim')?.value;
+    if(!ini||!fim){alert('Selecione a data inicial e a data final.');return;}
+    const inicio=new Date(ini+'T00:00:00');
+    let final=new Date(fim+'T23:59:59');
+    if(inicio>final){alert('A data inicial deve ser anterior ou igual à data final.');return;}
+    if(typeof inicioDoDia==='function')inicio=inicioDoDia(inicio);
+    if(typeof fimDoDia==='function')final=fimDoDia(final);
+    window.finPeriodoLivre={inicio:inicio,fim:final};
+    if(typeof renderFinPage==='function')renderFinPage();
+  };
+
+  window.limparPeriodoLivreFin=function(){
+    window.finPeriodoLivre=null;
+    const i=document.getElementById('finFreeInicio');if(i)i.value='';
+    const f=document.getElementById('finFreeFim');if(f)f.value='';
+    if(typeof renderFinPage==='function')renderFinPage();
+  };
+
+  /* Intercepta o cálculo do ciclo para usar o período livre quando ativo */
+  if(typeof window.intervaloCicloFinanceiro==='function'){
+    const _orig=window.intervaloCicloFinanceiro;
+    window.intervaloCicloFinanceiro=function(ref){
+      if(window.finPeriodoLivre){
+        return {inicio:window.finPeriodoLivre.inicio,fim:window.finPeriodoLivre.fim};
+      }
+      return _orig(ref);
+    };
+  }
+
+  /* Ajusta o rótulo quando estiver no período livre */
+  if(typeof window.renderFinPage==='function'){
+    const _origRender=window.renderFinPage;
+    window.renderFinPage=function(){
+      _origRender.apply(this,arguments);
+      if(window.finPeriodoLivre){
+        const lbl=document.getElementById('finSemanaLabel');
+        if(lbl){
+          lbl.textContent='Período livre · '+window.finPeriodoLivre.inicio.toLocaleDateString('pt-BR')+' até '+window.finPeriodoLivre.fim.toLocaleDateString('pt-BR');
+        }
+      }
+    };
+  }
+
+  function init(){injectCSS();injectHTML();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+  else init();
+})();
+</script>
   </body>
   </html>
